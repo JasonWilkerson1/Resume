@@ -1,0 +1,217 @@
+import React from 'react';
+import styled from 'styled-components';
+import { motion } from 'framer-motion';
+import { FaTrophy, FaAward, FaCertificate, FaMedal, FaStar } from 'react-icons/fa';
+import TerminalWindow from '../components/TerminalWindow';
+
+const AchievementsContainer = styled.div`
+  padding: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 100px);
+  padding-top: 2rem;
+`;
+
+const Command = styled.span`
+  color: #00FFFF;
+  margin-right: 0.5rem;
+`;
+
+const Prompt = styled.div`
+  color: #00FF00;
+  margin: 1.5rem 0 0.5rem;
+  font-family: 'Fira Code', monospace;
+`;
+
+const AchievementsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const AchievementCard = styled(motion.div)`
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid #00FF00;
+  border-radius: 6px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 255, 0, 0.2);
+  }
+  
+  .achievement-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    .icon {
+      font-size: 2rem;
+      margin-right: 1rem;
+      color: #00FFFF;
+    }
+    
+    .rank {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #FFD700;
+      margin-right: 0.5rem;
+    }
+    
+    .title {
+      font-size: 1.1rem;
+      color: #00FFFF;
+      margin: 0;
+      flex: 1;
+    }
+  }
+  
+  .description {
+    color: #00FF00;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  .meta {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 255, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .platform {
+      font-size: 0.85rem;
+      color: #00FF00;
+      display: flex;
+      align-items: center;
+      
+      &::before {
+        content: 'Platform:';
+        margin-right: 0.5rem;
+        color: #00FFFF;
+      }
+    }
+    
+    .date {
+      font-size: 0.85rem;
+      color: #00FF00;
+      display: flex;
+      align-items: center;
+      
+      &::before {
+        content: 'Date:';
+        margin-right: 0.5rem;
+        color: #00FFFF;
+      }
+    }
+  }
+`;
+
+const achievementsData = [
+  {
+    id: 1,
+    title: 'CompTIA Security+ Certified',
+    description: 'Earned the globally recognized certification that validates baseline cybersecurity skills and knowledge.',
+    platform: 'CompTIA',
+    date: '2024',
+    icon: <FaCertificate />,
+    rank: '1st'
+  },
+  {
+    id: 2,
+    title: 'Google Cybersecurity Certificate',
+    description: 'Completed comprehensive training in cybersecurity fundamentals, tools, and best practices.',
+    platform: 'Google',
+    date: '2024',
+    icon: <FaAward />,
+    rank: 'Top 5%'
+  },
+  {
+    id: 3,
+    title: 'HackerRank Java Certification',
+    description: 'Achieved expert level in Java programming with a perfect score on the HackerRank certification test.',
+    platform: 'HackerRank',
+    date: '2025',
+    icon: <FaMedal />,
+    rank: '100%'
+  },
+  {
+    id: 4,
+    title: 'React Frontend Developer',
+    description: 'Certified as a professional React developer with expertise in modern frontend development.',
+    platform: 'React Training',
+    date: '2025',
+    icon: <FaStar />,
+    rank: 'Expert'
+  },
+  {
+    id: 5,
+    title: 'AWS Cloud Practitioner',
+    description: 'Certified in AWS cloud services and infrastructure management.',
+    platform: 'Amazon Web Services',
+    date: '2024',
+    icon: <FaTrophy />,
+    rank: 'Passed'
+  },
+  {
+    id: 6,
+    title: 'JavaScript Algorithms Certification',
+    description: 'Demonstrated advanced problem-solving skills in JavaScript algorithms and data structures.',
+    platform: 'HackerRank',
+    date: '2025',
+    icon: <FaMedal />,
+    rank: '100%'
+  }
+];
+
+const Achievements = () => {
+  return (
+    <AchievementsContainer>
+      <TerminalWindow title="visitor@portfolio:~/achievements$">
+        <Prompt>
+          <Command>$</Command> ls -la
+        </Prompt>
+        
+        <AchievementsGrid>
+          {achievementsData.map((achievement, index) => (
+            <AchievementCard
+              key={achievement.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
+              <div className="achievement-header">
+                <span className="icon">{achievement.icon}</span>
+                <span className="rank">{achievement.rank}</span>
+                <h3 className="title">{achievement.title}</h3>
+              </div>
+              
+              <p className="description">{achievement.description}</p>
+              
+              <div className="meta">
+                <span className="platform">{achievement.platform}</span>
+                <span className="date">{achievement.date}</span>
+              </div>
+            </AchievementCard>
+          ))}
+        </AchievementsGrid>
+        
+        <Prompt style={{ marginTop: '2rem' }}>
+          <Command>$</Command> <span style={{ color: '#00FF00' }}>_</span>
+        </Prompt>
+      </TerminalWindow>
+    </AchievementsContainer>
+  );
+};
+
+export default Achievements;

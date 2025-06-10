@@ -1,49 +1,50 @@
 import { createGlobalStyle } from 'styled-components';
 
-const GlobalStyles = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
-  
+export const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
-  
-  body {
-    margin: 0;
-    padding: 0;
-    background: #1E1E1E;
-    color: #00FF00;
-    font-family: 'Fira Code', monospace;
-    font-size: 16px;
-    line-height: 1.6;
-    padding-top: 60px;
+
+  html {
+    scroll-behavior: smooth;
   }
-  
+
+  body {
+    font-family: 'Courier New', monospace;
+    background-color: #0a0a0a;
+    color: #00ff00;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: rgba(0, 255, 0, 0.2);
+    color: #00ff00;
+  }
+
   a {
-    color: #00FFFF;
+    color: #00ffff;
     text-decoration: none;
     transition: color 0.3s ease;
-    
+
     &:hover {
-      text-decoration: underline;
-      color: #00FF00;
+      color: #00ff00;
     }
   }
-  
+
+
   h1, h2, h3, h4, h5, h6 {
-    margin-bottom: 1rem;
-    color: #00FF00;
-  }
-  
-  p {
+    font-weight: 700;
+    line-height: 1.2;
     margin-bottom: 1rem;
   }
-  
-  button {
-    outline: none;
-    cursor: pointer;
+
+  button, input, textarea {
+    font-family: inherit;
+    font-size: 1rem;
   }
 `;
-
-export default GlobalStyles;
