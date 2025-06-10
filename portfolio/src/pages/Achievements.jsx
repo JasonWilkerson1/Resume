@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FaTrophy, FaStar, FaAward, FaCertificate } from 'react-icons/fa';
 
 const AchievementsContainer = styled.div`
-  padding: 1rem 2rem 4rem;
+  padding: 2rem 1.5rem 4rem;
   max-width: 1200px;
   margin: 0 auto;
   min-height: 100vh;
@@ -13,8 +13,9 @@ const AchievementsContainer = styled.div`
   
   h1 {
     color: #00FF00;
-    font-size: 1.2rem;
-    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
     
     span {
       color: #00FFFF;
@@ -155,7 +156,7 @@ const achievementsData = [
 const Achievements = () => {
   return (
     <AchievementsContainer>
-      <h1>visitor@security-portfolio:~$ <span>ls ./achievements</span></h1>
+      <h1>My <span>Achievements</span></h1>
       
       <AchievementsGrid>
         {achievementsData.map((achievement, index) => (
@@ -185,15 +186,6 @@ const Achievements = () => {
           </AchievementCard>
         ))}
       </AchievementsGrid>
-      
-      <motion.p
-        style={{ color: '#00FF00', marginTop: '2rem' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-      >
-        visitor@security-portfolio:~$ <span>cd ..</span>
-      </motion.p>
     </AchievementsContainer>
   );
 };

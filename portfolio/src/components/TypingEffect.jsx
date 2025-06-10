@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 
-const TypingContainer = styled.span`
+const TypingContainer = styled.div`
   color: #00FFFF;
   font-weight: 500;
   min-height: 1.5em;
-  display: inline-block;
+  display: block;
   text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.6;
+  margin: 0.5rem 0;
 `;
 
 const blink = keyframes`
@@ -19,61 +23,83 @@ const Cursor = styled.span`
   width: 8px;
   height: 1.2em;
   background: #00FF00;
-  margin-left: 4px;
-  vertical-align: middle;
+  margin-left: 2px;
+  vertical-align: text-bottom;
   animation: ${blink} 1s step-end infinite;
 `;
 
-const TypingEffect = () => {
-  const [text, setText] = useState('');
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [loopNum, setLoopNum] = useState(0);
-  const [typingSpeed, setTypingSpeed] = useState(100);
+const TypingEffect = ({ 
+  phrases = [
+    "I'm a Full-Stack Developer",
+    "I'm a Problem Solver",
+    "I'm a Tech Enthusiast",
+    "I'm a Lifelong Learner"
+  ],
+  speed = 100,
+  deleteSpeed = 50, // Increased delete speed for better visibility
+  pauseTime = 2000,
+  loop = true
+}) => {
+  const [displayText, setDisplayText] = useState('');
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [phase, setPhase] = useState('waiting');
+  const [typingComplete, setTypingComplete] = useState(false);
 
   useEffect(() => {
-    const phrases = [
-      "I'm a Full-Stack Developer with a passion for cybersecurity.",
-      "A Computer Science graduate from University of Mississippi.",
-      "Pursuing my Master's in CS at Georgia Tech.",
-      "CompTIA Security+ and Google Cybersecurity certified.",
-      "Building secure, scalable software solutions."
-    ];
+    let timeoutId;
+    const currentPhrase = phrases[currentPhraseIndex] || '';
 
-    const timer = setTimeout(() => {
-      const currentPhrase = phrases[loopNum % phrases.length];
-      
-      if (isDeleting) {
-        // Deleting
-        setText(prev => {
-          const newText = prev.substring(0, prev.length - 1);
-          if (newText === '') {
-            setIsDeleting(false);
-            setLoopNum(prevLoop => prevLoop + 1);
-            setTypingSpeed(500);
-          }
-          return newText;
-        });
-        setTypingSpeed(50);
+    const handleTyping = () => {
+      if (displayText.length < currentPhrase.length) {
+        setDisplayText(currentPhrase.substring(0, displayText.length + 1));
+        timeoutId = setTimeout(handleTyping, speed);
       } else {
-        // Typing
-        setText(prev => {
-          const newText = currentPhrase.substring(0, prev.length + 1);
-          if (newText === currentPhrase) {
-            setTimeout(() => setIsDeleting(true), 2000);
-          }
-          return newText;
-        });
-        setTypingSpeed(100 + Math.random() * 50);
+        setTypingComplete(true);
+        timeoutId = setTimeout(() => {
+          setPhase('deleting');
+          setTypingComplete(false);
+        }, pauseTime);
       }
-    }, typingSpeed);
+    };
 
-    return () => clearTimeout(timer);
-  }, [text, isDeleting, loopNum, typingSpeed]);
+    const handleDeleting = () => {
+      if (displayText.length > 0) {
+        setDisplayText(displayText.slice(0, -1));
+        timeoutId = setTimeout(handleDeleting, deleteSpeed);
+      } else {
+        const nextIndex = (currentPhraseIndex + 1) % phrases.length;
+        setCurrentPhraseIndex(nextIndex);
+        setPhase('waiting');
+        timeoutId = setTimeout(() => {
+          setPhase('typing');
+          handleTyping();
+        }, speed);
+      }
+    };
+
+    if (phase === 'typing' && !typingComplete) {
+      handleTyping();
+    } else if (phase === 'deleting') {
+      handleDeleting();
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [phase, displayText, currentPhraseIndex, phrases, speed, deleteSpeed, pauseTime, typingComplete]);
+
+  // Reset when phrases change
+  useEffect(() => {
+    setDisplayText('');
+    setCurrentPhraseIndex(0);
+    setPhase('waiting');
+    setTypingComplete(false);
+  }, [phrases]);
 
   return (
     <TypingContainer>
-      user@portfolio:~$ {text}
-      <Cursor>|</Cursor>
+      <div style={{ display: 'inline-flex', alignItems: 'center', minHeight: '1.5em' }}>
+        <span>{displayText}</span>
+        <Cursor />
+      </div>
     </TypingContainer>
   );
 };

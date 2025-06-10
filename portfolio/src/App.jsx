@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
+import { Link } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -18,21 +19,76 @@ import TechCarousel from './components/TechCarousel';
 import TerminalWindow from './components/TerminalWindow';
 
 // ============ Animations ============
-const flicker = keyframes`
-  0% { opacity: 0.1; }
-  2% { opacity: 0.8; }
-  8% { opacity: 0.1; }
-  9% { opacity: 0.8; }
-  12% { opacity: 0.1; }
-  20% { opacity: 0.8; }
-  25% { opacity: 0.3; }
-  30% { opacity: 0.8; }
-  70% { opacity: 0.8; }
-  72% { opacity: 0.2; }
-  77% { opacity: 0.8; }
-  100% { opacity: 0.8; }
+
+const glitch = keyframes`
+    0% { transform: translate(0); opacity: 1; }
+    20% { transform: translate(2px, -2px); opacity: 0.8; }
+    40% { transform: translate(-2px, 2px); opacity: 0.9; }
+    60% { transform: translate(3px, 1px); opacity: 0.7; }
+    80% { transform: translate(-1px, -3px); opacity: 0.9; }
+    100% { transform: translate(0); opacity: 1; }
+  `;
+
+  const bounce = keyframes`
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(5px, -5px); }
+    50% { transform: translate(-5px, 5px); }
+    75% { transform: translate(5px, 5px); }
+  `;
+
+  const blink = keyframes`
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  `;const ClickMe = styled.span`
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #00FF00;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  background: rgba(0, 30, 60, 0.8);
+  border: 1px solid #00FF00;
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 1000;
+  opacity: ${props => props.show ? 1 : 0};
+  animation: ${glitch} 0.5s infinite, ${bounce} 1s infinite;
+  pointer-events: none;
 `;
 
+  // GlitchButton Component
+  const GlitchButtonStyled = styled.button`
+    position: relative;
+    background: rgba(0, 150, 255, 0.15);
+    color: #00B4FF;
+    border: 1px solid #00B4FF;
+    padding: 0.8rem 2rem;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.3);
+    &:hover {
+      background: rgba(0, 180, 255, 0.3);
+      color: #00F0FF;
+      box-shadow: 0 0 20px rgba(0, 150, 255, 0.6);
+    }
+  `;
+  const GlitchButton = ({ children }) => {
+    const [showStatic, setShowStatic] = useState(false);
+    return (
+      <GlitchButtonStyled
+        onMouseEnter={() => setShowStatic(true)}
+        onMouseLeave={() => setShowStatic(false)}
+      >
+        {children}
+        <ClickMe show={showStatic}>click me</ClickMe>
+      </GlitchButtonStyled>
+    );
+  };
 const scanline = keyframes`
   from { top: -100%; }
   to { top: 100%; }
@@ -78,16 +134,16 @@ const Noise = styled.div`
 const MainContent = styled.main`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem 2rem 2rem;
   position: relative;
   z-index: 1;
 `;
 
 const Header = styled.header`
   text-align: center;
-  margin-bottom: 3rem;
-  padding: 2rem 0;
-  border-bottom: 1px solid #00ff00;
+  margin: 0;
+  padding: 1rem 0 2rem;
+  border-bottom: none;
 `;
 
 const Title = styled.h1`
@@ -120,34 +176,14 @@ const Subtitle = styled.p`
 `;
 
 const TerminalContainer = styled.div`
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid #00ff00;
-  border-radius: 5px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  font-family: 'Courier New', monospace;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 255, 0, 0.1) 0%,
-      transparent 2%,
-      transparent 98%,
-      rgba(0, 255, 0, 0.1) 100%
-    );
-    pointer-events: none;
-  }
-`;
-
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid #00FF00;
+      border-radius: 5px;
+      padding: 1rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: visible;
+    `;
 const TerminalHeader = styled.div`
   display: flex;
   align-items: center;
@@ -172,8 +208,11 @@ const TerminalTitle = styled.span`
 `;
 
 const TerminalContent = styled.div`
+  color: #00FF00;
+  font-family: 'Courier New', monospace;
+  line-height: 1.6;
   min-height: 100px;
-  line-height: 1.5;
+  overflow: visible;
 `;
 
 const CommandLine = styled.div`
@@ -552,376 +591,152 @@ const ContactInfo = styled.div`
   }
 `;
 
+const TypewriterContainer = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #00FF00;
+  font-family: 'Courier New', monospace;
+`;
+
 const Cursor = styled.span`
   display: inline-block;
-  width: 10px;
-  height: 20px;
-  background: #00ff00;
-  margin-left: 5px;
-  animation: blink 1s step-end infinite;
+  width: 8px;
+  height: 1.2em;
+  background: #00FF00;
+  animation: ${blink} 1s step-end infinite;
+`;
+
+const Typewriter = React.memo(({ 
+  text = '', 
+  speed = 50, 
+  deleteSpeed = 30,
+  pauseTime = 2000,
+  loop = true
+}) => {
+  const [displayText, setDisplayText] = React.useState('');
+  const [isDeleting, setIsDeleting] = React.useState(false);
+  const [index, setIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    let timeoutId;
+    
+    const type = () => {
+      if (!isDeleting && index < text.length) {
+        setDisplayText(text.substring(0, index + 1));
+        setIndex(index + 1);
+        timeoutId = setTimeout(type, speed);
+      } else if (isDeleting && index > 0) {
+        setDisplayText(text.substring(0, index - 1));
+        setIndex(index - 1);
+        timeoutId = setTimeout(type, deleteSpeed);
+      } else if (!isDeleting && index === text.length) {
+        timeoutId = setTimeout(() => setIsDeleting(true), pauseTime);
+      } else if (isDeleting && index === 0 && loop) {
+        setIsDeleting(false);
+        setIndex(0);
+        timeoutId = setTimeout(type, speed);
+      }
+    };
+    
+    timeoutId = setTimeout(type, speed);
+    return () => clearTimeout(timeoutId);
+  }, [text, speed, deleteSpeed, pauseTime, loop, index, isDeleting]);
+
+  return (
+    <TypewriterContainer>
+      {displayText}
+      <Cursor />
+    </TypewriterContainer>
+  );
+});
+
+const NavBar = styled.nav`
+  display: flex;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+  position: relative;
+`;
+
+const NavItem = styled(GlitchButton)`
+  color: #00AA00;
+  text-decoration: none;
+  font-family: 'Courier New', monospace;
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease;
   
-  @keyframes blink {
-    from, to { opacity: 1; }
-    50% { opacity: 0; }
+  &:hover {
+    color: #00FF00;
+    background: rgba(0, 255, 0, 0.1);
+    border-radius: 4px;
   }
 `;
 
-const Typewriter = ({ 
-  text = '', // Default to empty string if undefined
-  speed = 30, 
-  delay = 0, 
-  onComplete, 
-  onTypingStart, 
-  isDeleting = false, 
-  isLast = false,
-  loop = false,
-  deleteSpeed = 15,
-  pauseTime = 2000
-}) => {
-  // Ensure text is always a string
-  const safeText = String(text || '');
-  const [displayText, setDisplayText] = useState('');
+// TerminalTyping Component
+const TerminalTyping = memo(({ commands = [] }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showCursor, setShowCursor] = useState(true);
-  const [isTyping, setIsTyping] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
-  const [phase, setPhase] = useState('typing'); // 'typing', 'pausing', 'deleting'
-  const timeoutRef = useRef(null);
-  const cursorIntervalRef = useRef(null);
-  const loopCountRef = useRef(0);
-  const maxLoops = 1; // Number of times to loop before stopping
-
-  // Handle cursor blink effect
-  useEffect(() => {
-    if (!isTyping && !isComplete) {
-      cursorIntervalRef.current = setInterval(() => {
-        setShowCursor(prev => !prev);
-      }, 500);
-    }
-    
-    return () => {
-      if (cursorIntervalRef.current) {
-        clearInterval(cursorIntervalRef.current);
-      }
-    };
-  }, [isTyping, isComplete]);
-
-  // Handle typing animation phases
-  useEffect(() => {
-    if (isComplete || !safeText) return;
-    
-    let timeout;
-    
-    const startTyping = () => {
-      setIsTyping(true);
-      if (onTypingStart) onTypingStart();
-      
-      if (currentIndex < safeText.length) {
-        // Typing forward
-        timeout = setTimeout(() => {
-          setDisplayText(prev => prev + safeText[currentIndex]);
-          setCurrentIndex(prev => prev + 1);
-        }, speed);
-      } else {
-        // Finished typing, pause before deleting
-        setPhase('pausing');
-        timeout = setTimeout(() => {
-          if (loop && loopCountRef.current < maxLoops) {
-            setPhase('deleting');
-          } else {
-            setIsTyping(false);
-            setIsComplete(true);
-            if (onComplete) onComplete();
-          }
-        }, pauseTime);
-      }
-    };
-    
-    const startDeleting = () => {
-      if (currentIndex > 0) {
-        // Deleting text
-        timeout = setTimeout(() => {
-          setDisplayText(prev => prev.slice(0, -1));
-          setCurrentIndex(prev => prev - 1);
-        }, deleteSpeed);
-      } else {
-        // Finished deleting, reset for next loop
-        loopCountRef.current += 1;
-        setPhase('typing');
-      }
-    };
-    
-    switch (phase) {
-      case 'typing':
-        startTyping();
-        break;
-      case 'deleting':
-        startDeleting();
-        break;
-      case 'pausing':
-        // Just wait, timeout already set
-        break;
-      default:
-        break;
-    }
-    
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [currentIndex, text, phase, isComplete, speed, deleteSpeed, pauseTime, loop, onComplete, onTypingStart]);
-  
-  // Handle initial delay
-  useEffect(() => {
-    if (delay > 0) {
-      setIsTyping(false);
-      const timer = setTimeout(() => {
-        setCurrentIndex(0);
-        setDisplayText('');
-        setIsComplete(false);
-        setPhase('typing');
-      }, delay);
-      return () => clearTimeout(timer);
-    } else if (!safeText) {
-      // If there's no text, immediately complete
-      setIsComplete(true);
-      if (onComplete) onComplete();
-    }
-  }, [safeText, delay, onComplete]);
-
-  // Handle initial delay
-  useEffect(() => {
-    if (delay > 0) {
-      const timer = setTimeout(() => {
-        setCurrentIndex(0);
-        setDisplayText('');
-        setIsComplete(false);
-      }, delay);
-      return () => clearTimeout(timer);
-    }
-  }, [text, delay]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      if (cursorIntervalRef.current) clearInterval(cursorIntervalRef.current);
-    };
-  }, []);
-
-  // Don't render anything if there's no text
-  if (!safeText) return null;
-  
-  return (
-    <span>
-      {displayText}
-      {showCursor && isTyping && <Cursor>|</Cursor>}
-      {showCursor && !isTyping && <Cursor>_</Cursor>}
-    </span>
-  );
-};
-
-const TerminalTyping = ({ 
-  commands: rawCommands = [], 
-  onComplete, 
-  showHeader = true, 
-  initialPath = '~',
-  typingSpeed = 30,
-  deleteSpeed = 15,
-  commandDelay = 800,
-  outputDelay = 500,
-  pauseTime = 1500
-}) => {
-  // Ensure commands is always an array with valid command objects
-  const commands = React.useMemo(() => {
-    if (!Array.isArray(rawCommands)) return [];
-    return rawCommands
-      .filter(cmd => cmd && (cmd.command || cmd.output))
-      .map(cmd => ({
-        command: String(cmd.command || ''),
-        output: cmd.output ? String(cmd.output) : '',
-        commandDelay: Number(cmd.commandDelay) || commandDelay,
-        outputDelay: Number(cmd.outputDelay) || outputDelay
-      }));
-  }, [rawCommands, commandDelay, outputDelay]);
-  
-  const hasCommands = commands.length > 0;
-  const [currentCommandIndex, setCurrentCommandIndex] = useState(0);
   const [completedCommands, setCompletedCommands] = useState([]);
-  const [currentOutput, setCurrentOutput] = useState('');
-  const [showFinalPrompt, setShowFinalPrompt] = useState(false);
-  const [currentPhase, setCurrentPhase] = useState('typing-command'); // 'typing-command', 'showing-output', 'finished'
-  const allCommandsComplete = useRef(false);
-  const commandTimers = useRef([]);
-  
-  // Clear all timeouts on unmount
-  useEffect(() => {
-    const timers = commandTimers.current;
-    return () => {
-      timers.forEach(timer => timer && clearTimeout(timer));
-    };
-  }, []);
+  const [isTyping, setIsTyping] = useState(true);
 
-  // Handle command execution flow
   useEffect(() => {
-    if (allCommandsComplete.current || currentCommandIndex >= commands.length || !hasCommands) {
-      // If no commands or all done, mark as complete
-      if (!allCommandsComplete.current && hasCommands) {
-        allCommandsComplete.current = true;
-        setShowFinalPrompt(true);
-        setCurrentPhase('finished');
-        if (onComplete) onComplete();
-      }
-      return;
+    if (currentIndex >= commands.length) return;
+    
+    const cmd = commands[currentIndex];
+    let timer;
+    
+    if (isTyping) {
+      // Typing phase
+      timer = setTimeout(() => {
+        setCompletedCommands(prev => [...prev, cmd]);
+        setIsTyping(false);
+      }, cmd.commandDelay || 100);
+    } else {
+      // Output display phase
+      timer = setTimeout(() => {
+        setCurrentIndex(prev => prev + 1);
+        setIsTyping(true);
+      }, cmd.outputDelay || 1000);
     }
     
-    const currentCommand = commands[currentCommandIndex];
-    
-    const processCommand = () => {
-      // Start typing the command
-      setCurrentPhase('typing-command');
-      
-      // Calculate time to type the command
-      const typingTime = currentCommand.command.length * typingSpeed;
-      
-      // Schedule showing the output
-      const outputTimer = setTimeout(() => {
-        if (currentCommand.output) {
-          setCurrentPhase('showing-output');
-          setCurrentOutput(currentCommand.output);
-          
-          // Schedule moving to next command or finishing
-          const nextCommandTimer = setTimeout(() => {
-            // Add current command to completed commands
-            setCompletedCommands(prev => [...prev, currentCommand]);
-            
-            // Clear current output
-            setCurrentOutput('');
-            
-            // Move to next command or finish
-            if (currentCommandIndex < commands.length - 1) {
-              setCurrentCommandIndex(prev => prev + 1);
-            } else {
-              // All commands complete
-              allCommandsComplete.current = true;
-              setShowFinalPrompt(true);
-              setCurrentPhase('finished');
-              if (onComplete) onComplete();
-            }
-          }, (currentCommand.outputDelay || outputDelay) + pauseTime);
-          
-          commandTimers.current.push(nextCommandTimer);
-        } else {
-          // No output, just move to next command
-          setCompletedCommands(prev => [...prev, currentCommand]);
-          
-          if (currentCommandIndex < commands.length - 1) {
-            setCurrentCommandIndex(prev => prev + 1);
-          } else {
-            // All commands complete
-            allCommandsComplete.current = true;
-            setShowFinalPrompt(true);
-            setCurrentPhase('finished');
-            if (onComplete) onComplete();
-          }
-        }
-      }, typingTime + (currentCommand.commandDelay || commandDelay));
-      
-      commandTimers.current.push(outputTimer);
-    };
-    
-    processCommand();
-    
-    return () => {
-      // Cleanup will be handled by the main effect cleanup
-    };
-  }, [currentCommandIndex, commands, onComplete, typingSpeed, deleteSpeed, commandDelay, outputDelay, pauseTime]);
-  
-  const currentCommand = commands[currentCommandIndex] || {};
-  
-  // Don't render if there are no commands
-  if (!hasCommands) {
-    return null;
-  }
+    return () => clearTimeout(timer);
+  }, [currentIndex, commands, isTyping]);
 
   return (
-    <div style={{ width: '100%' }}>
-      {showHeader && (
-        <TerminalHeader>
-          <TerminalButton color="#ff5f56" />
-          <TerminalButton color="#ffbd2e" />
-          <TerminalButton color="#27c93f" />
-          <TerminalTitle>visitor@portfolio:{initialPath || '~'}$</TerminalTitle>
-        </TerminalHeader>
-      )}
-      <TerminalContent>
-        {/* Show completed commands with their outputs */}
+    <TerminalWindow title="visitor@portfolio:~$">
+      <div style={{ color: '#00FF00', fontFamily: '"Courier New", monospace' }}>
         {completedCommands.map((cmd, idx) => (
-          <div key={idx}>
-            <CommandLine>
-              <Prompt>$</Prompt>
-              <Command>{cmd.command}</Command>
-            </CommandLine>
+          <div key={idx} style={{ marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: '0.5rem' }}>$</span>
+              <span>{cmd.command}</span>
+            </div>
             {cmd.output && (
-              <Output>
-                {cmd.output.split('\n').map((line, i) => (
-                  <div key={i} style={{ margin: '0.25rem 0' }}>{line}</div>
-                ))}
-              </Output>
+              <div style={{ marginLeft: '1.5rem', marginTop: '0.25rem' }}>
+                {cmd.output}
+              </div>
             )}
           </div>
         ))}
-        
-        {/* Current command being typed */}
-        {currentCommand && currentPhase !== 'finished' && (
-          <CommandLine>
-            <Prompt>$</Prompt>
-            <Command>
-              <Typewriter 
-                text={currentCommand.command} 
-                speed={typingSpeed}
-                deleteSpeed={deleteSpeed}
-                loop={false}
-                onComplete={() => {
-                  // Command typing complete, output will be shown by the effect
-                }}
-              />
-            </Command>
-          </CommandLine>
+        {currentIndex < commands.length && !isTyping && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: '0.5rem' }}>$</span>
+            <Typewriter 
+              text={commands[currentIndex].command} 
+              loop={false} 
+              speed={30}
+            />
+          </div>
         )}
-        
-        {/* Current command's output */}
-        {currentOutput && (
-          <Output>
-            {currentPhase === 'showing-output' ? (
-              <Typewriter 
-                text={currentOutput}
-                speed={5}
-                deleteSpeed={2}
-                loop={false}
-                onComplete={() => {
-                  // Output typing complete, next command will be processed by the effect
-                }}
-              />
-            ) : (
-              // Show static output if not in showing-output phase
-              currentOutput.split('\n').map((line, i) => (
-                <div key={i} style={{ margin: '0.25rem 0' }}>{line}</div>
-              ))
-            )}
-          </Output>
-        )}
-        
-        {/* Final prompt when all commands are complete */}
-        {showFinalPrompt && (
-          <CommandLine>
-            <Prompt>$</Prompt>
-            <Command><Cursor>_</Cursor></Command>
-          </CommandLine>
-        )}
-      </TerminalContent>
-    </div>
+      </div>
+    </TerminalWindow>
   );
-};
+});
+
 
 // ============ Data ============
 
@@ -1092,9 +907,7 @@ My technical toolkit includes React, Python, SQL, and AWS services such as Elast
   
   const terminalCommands = [
     { command: 'whoami', output: 'visitor' },
-    { command: 'uname -a', output: 'Linux portfolio 5.4.0-42-generic #46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux' },
     { command: 'cat about.txt', output: 'Passionate developer with expertise in building web applications and solving complex problems.\n\nSkills: JavaScript, React, Node.js, Python, and more...' },
-    { command: 'ls -la projects/', output: 'total 16\ndrwxr-xr-x 4 visitor visitor 4096 May 1 10:00 .\ndrwxr-xr-x 9 visitor visitor 4096 May 1 10:00 ..\ndrwxr-xr-x 8 visitor visitor 4096 May 1 10:00 portfolio\ndrwxr-xr-x 8 visitor visitor 4096 May 1 10:00 ecommerce' },
     { command: 'echo $PATH', output: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin' },
     { command: 'date', output: new Date().toLocaleString() }
   ];
@@ -1110,7 +923,7 @@ My technical toolkit includes React, Python, SQL, and AWS services such as Elast
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowResumeButton(true);
-    }, 15000);
+    }, 0);
     
     return () => clearTimeout(timer);
   }, []);
@@ -1122,26 +935,30 @@ My technical toolkit includes React, Python, SQL, and AWS services such as Elast
       
       <MainContent>
         <Header>
-          <Title>Jason Wilkerson</Title>
+          <Title style={{ padding: '20px 0' }}>Jason Wilkerson</Title>
           <Subtitle>
             <Typewriter 
               text={phrases[currentPhrase]} 
-              speed={100} 
-              delay={500} 
+              speed={50} 
+              delay={100}
+              deleteSpeed={30}
+              pauseTime={2000}
+              loop={true}
             />
           </Subtitle>
           
           {showResumeButton && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 25 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
               style={{ marginTop: '2rem' }}
             >
-              <a 
-                href="/resume.pdf" 
-                target="_blank" 
+              <a
+                href="/resume2.pdf"
+                target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => console.log('Resume button clicked')}
                 style={{
                   display: 'inline-block',
                   padding: '0.75rem 2rem',
@@ -1152,25 +969,25 @@ My technical toolkit includes React, Python, SQL, and AWS services such as Elast
                   textDecoration: 'none',
                   fontFamily: '"Courier New", monospace',
                   position: 'relative',
-                  overflow: 'hidden',
                   zIndex: 1,
                   transition: 'all 0.3s ease',
-                  '&:hover': {
-                    background: 'rgba(0, 255, 0, 0.1)',
-                    boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)',
-                    transform: 'translateY(-2px)'
-                  },
-                  '&::before': {
-                    content: '"\u00A0\u003E\u00A0"',
-                    marginRight: '0.5rem'
-                  },
-                  '&::after': {
-                    content: '"\u00A0\u003C\u00A0"',
-                    marginLeft: '0.5rem'
-                  }
+                }}
+                onMouseEnter={(e) => {
+                  console.log('Mouse entered resume button'); // Debug log
+                  e.currentTarget.style.background = 'rgba(0, 255, 0, 0.1)';
+                  e.currentTarget.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  console.log('Mouse left resume button'); // Debug log
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'none';
                 }}
               >
+                <span style={{ marginRight: '0.5rem' }}>&gt;</span>
                 View Resume
+                <span style={{ marginLeft: '0.5rem' }}>&lt;</span>
               </a>
             </motion.div>
           )}
@@ -1178,23 +995,18 @@ My technical toolkit includes React, Python, SQL, and AWS services such as Elast
         
         <Section id="about">
           <h2>About Me</h2>
-          <TerminalTyping commands={[
-            { command: 'whoami', output: 'visitor' },
-            { command: 'uname -a', output: 'Linux portfolio 5.4.0-42-generic #46-Ubuntu SMP Fri Jul 10 00:24:02 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux' },
-            { command: 'cat about.txt', output: 'Passionate developer with expertise in building web applications and solving complex problems.\n\nSkills: JavaScript, React, Node.js, Python, and more...' },
-          ]} />
+          <TerminalTyping
+            commands={[
+              { command: 'whoami', output: 'visitor', commandDelay: 300, outputDelay: 300 },
+              { command: 'cat about.txt', output: aboutMeText, commandDelay: 300, outputDelay: 10 },
+            ]}
+          />
         </Section>
         
         <TerminalWindow title="visitor@portfolio:~/projects$">
           <Section id="projects">
             <h2>Projects</h2>
-            <TerminalTyping 
-              commands={[
-                { command: 'ls -la', output: 'total 20\ndrwxr-xr-x 5 visitor visitor 4096 May 1 10:00 .\ndrwxr-xr-x 9 visitor visitor 4096 May 1 10:00 ..\ndrwxr-xr-x 8 visitor visitor 4096 May 1 10:00 phishing-detection\ndrwxr-xr-x 8 visitor visitor 4096 May 1 10:00 camerons-airhvac\ndrwxr-xr-x 8 visitor visitor 4096 May 1 10:00 ai-chatbot\ndrwxr-xr-x 8 visitor visitor 4096 May 1 10:00 box-project' },
-                { command: 'cat projects.txt', output: '1. Phishing Detection & Awareness Platform\n2. CameronsAirHVAC Website\n3. AI Chatbot with OpenAI Integration\n4. Box Project (Non-Profit Website)' }
-              ]}
-              showHeader={false}
-            />
+            
             <ProjectsGrid>
               {projects.map(project => (
                 <ProjectCard
