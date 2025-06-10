@@ -955,7 +955,7 @@ My technical toolkit includes React, Python, SQL, and AWS services such as Elast
               style={{ marginTop: '2rem' }}
             >
               <a
-                href="/resume2.pdf"
+                href="/Jason Wilkerson_(Front end) Resume.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => console.log('Resume button clicked')}

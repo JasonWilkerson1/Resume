@@ -247,7 +247,7 @@ const Home = () => {
               <div style={{ position: 'relative', display: 'inline-block' }}>
                 <GlitchButton
                   as="a"
-                  href="/resume2.pdf"
+                  href="/Jason Wilkerson_(Front end) Resume.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{

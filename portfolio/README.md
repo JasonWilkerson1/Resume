@@ -1,17 +1,18 @@
 # Portfolio Website
 
-A modern, responsive portfolio website built with React, Vite, and Styled Components. This portfolio features a terminal-like interface with interactive elements and smooth animations.
+A modern, interactive portfolio website with a retro terminal aesthetic. Built with React, Vite, and Styled Components, this portfolio showcases my skills, projects, and professional experience in a unique, command-line inspired interface.
 
-![Portfolio Preview](./public/portfolio-preview.png)
+![Portfolio Preview](https://portfolio-jasonwilkerson.netlify.app/)
 
 ## Features
 
-- 🖥️ Terminal-style interface with typing effect
-- 🌓 Dark theme with green accent colors
-- 📱 Fully responsive design
-- 🚀 Smooth page transitions
-- ✨ Interactive elements with glitch effects
-- 📄 Easy-to-update project and skill sections
+- **Terminal UI**: Immersive command-line interface experience
+- **Responsive Design**: Fully responsive layout that works on all devices
+- **Interactive Elements**: Hover effects, glitch animations, and typing animations
+- **Dark Theme**: Easy-on-the-eyes dark theme with green accents
+- **Project Showcase**: Detailed project cards with technologies used
+- **Skills Matrix**: Visual representation of technical skills and expertise
+- **Contact Information**: Easy way to get in touch
 
 ## Technologies Used
 
